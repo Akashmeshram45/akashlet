@@ -1,0 +1,17 @@
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+#clear-cart {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+}
+#clear-cart:hover {
+    opacity: 0.8;
+}
