@@ -16,12 +16,12 @@
         <div id="cart-actions">
             <button id="clear-cart">Clear Cart</button>
             <button id="proceed-to-pay">Proceed to Pay</button>
-            <button id="back-to-home">Back to Home</button> <!-- Back to Home Button -->
+            <button id="back-to-home">Back to Home</button>
         </div>
     </main>
+
     <script src="cart.js"></script>
     <script>
-        // Load and display cart items
         document.addEventListener('DOMContentLoaded', () => {
             const cartItemsDiv = document.getElementById('cart-items');
             const totalPriceSpan = document.getElementById('total-price');
@@ -42,15 +42,21 @@
                 totalPriceSpan.textContent = "Rs. 0";
             } else {
                 // Display each item and calculate total
+                displayCartItems();
+            }
+
+            // Function to display cart items
+            function displayCartItems() {
+                cartItemsDiv.innerHTML = ''; // Clear the cart before re-rendering
                 cart.forEach(item => {
                     const itemDiv = document.createElement('div');
                     itemDiv.classList.add('cart-item');
-                    const itemTotal = item.price * item.quantity; // Total price per item
+                    const itemTotal = item.price * item.quantity;
                     itemDiv.innerHTML = `
                         <p>${item.name} - Rs. ${item.price} x 
                             <span class="quantity">${item.quantity}</span> = Rs. ${itemTotal}</p>
                         <button class="decrease-quantity" data-name="${item.name}">-</button>
-                        <span class="product-quantity">${item.quantity}</span> <!-- Display quantity -->
+                        <span class="product-quantity">${item.quantity}</span>
                         <button class="increase-quantity" data-name="${item.name}">+</button>
                         <button class="remove-item" data-name="${item.name}">Remove</button>
                     `;
@@ -59,73 +65,67 @@
 
                 // Update the total price display
                 totalPriceSpan.textContent = `Rs. ${calculateTotal()}`;
+                addEventListeners(); // Reattach event listeners
+            }
+
+            // Reattach event listeners after rendering the cart
+            function addEventListeners() {
+                // Remove item from cart
+                document.querySelectorAll('.remove-item').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const name = button.getAttribute('data-name');
+                        removeItemFromCart(name);
+                    });
+                });
+
+                // Decrease item quantity
+                document.querySelectorAll('.decrease-quantity').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const name = button.getAttribute('data-name');
+                        decreaseQuantity(name);
+                    });
+                });
+
+                // Increase item quantity
+                document.querySelectorAll('.increase-quantity').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const name = button.getAttribute('data-name');
+                        increaseQuantity(name);
+                    });
+                });
             }
 
             // Remove item from cart
-            document.querySelectorAll('.remove-item').forEach(button => {
-                button.addEventListener('click', () => {
-                    const name = button.getAttribute('data-name');
-                    cart = cart.filter(item => item.name !== name); // Filter out the item
-                    localStorage.setItem('cart', JSON.stringify(cart)); // Update localStorage
-                    updateCartDisplay();  // Re-render cart
-                    updateTotal();  // Recalculate total
-                });
-            });
+            function removeItemFromCart(name) {
+                cart = cart.filter(item => item.name !== name); // Filter out the item
+                localStorage.setItem('cart', JSON.stringify(cart)); // Update localStorage
+                displayCartItems();  // Re-render cart
+            }
 
             // Decrease item quantity
-            document.querySelectorAll('.decrease-quantity').forEach(button => {
-                button.addEventListener('click', () => {
-                    const name = button.getAttribute('data-name');
-                    const item = cart.find(item => item.name === name);
-
-                    if (item.quantity > 1) { // Prevent quantity from going below 1
-                        item.quantity -= 1;
-                        localStorage.setItem('cart', JSON.stringify(cart)); // Update localStorage
-                        updateCartDisplay(); // Re-render cart
-                        updateTotal(); // Update total price
-                    }
-                });
-            });
+            function decreaseQuantity(name) {
+                const item = cart.find(item => item.name === name);
+                if (item.quantity > 1) { // Prevent quantity from going below 1
+                    item.quantity -= 1;
+                    localStorage.setItem('cart', JSON.stringify(cart)); // Update localStorage
+                    displayCartItems(); // Re-render cart
+                }
+            }
 
             // Increase item quantity
-            document.querySelectorAll('.increase-quantity').forEach(button => {
-                button.addEventListener('click', () => {
-                    const name = button.getAttribute('data-name');
-                    const item = cart.find(item => item.name === name);
-
-                    item.quantity += 1; // Increase quantity by 1
-                    localStorage.setItem('cart', JSON.stringify(cart)); // Update localStorage
-                    updateCartDisplay(); // Re-render cart
-                    updateTotal(); // Update total price
-                });
-            });
+            function increaseQuantity(name) {
+                const item = cart.find(item => item.name === name);
+                item.quantity += 1; // Increase quantity by 1
+                localStorage.setItem('cart', JSON.stringify(cart)); // Update localStorage
+                displayCartItems(); // Re-render cart
+            }
 
             // Clear the entire cart
             document.getElementById('clear-cart').addEventListener('click', () => {
                 localStorage.removeItem('cart');
-                updateTotal();  // Reset total when clearing cart
-                location.reload();
+                totalPriceSpan.textContent = "Rs. 0"; // Reset total when clearing cart
+                displayCartItems(); // Re-render empty cart
             });
-
-            // Update the total price
-            function updateTotal() {
-                totalPriceSpan.textContent = `Rs. ${calculateTotal()}`; // Update total dynamically
-            }
-
-            // Update cart display
-            function updateCartDisplay() {
-                const cartItems = document.querySelectorAll('.cart-item');
-                cartItems.forEach(cartItem => {
-                    const name = cartItem.querySelector('.remove-item').getAttribute('data-name');
-                    const item = cart.find(item => item.name === name);
-                    const quantitySpan = cartItem.querySelector('.product-quantity');
-                    quantitySpan.textContent = item.quantity; // Update quantity display
-
-                    const itemTotal = item.price * item.quantity;
-                    const itemPrice = cartItem.querySelector('p');
-                    itemPrice.innerHTML = `${item.name} - Rs. ${item.price} x <span class="quantity">${item.quantity}</span> = Rs. ${itemTotal}`;
-                });
-            }
 
             // Proceed to payment
             document.getElementById('proceed-to-pay').addEventListener('click', () => {
@@ -135,7 +135,7 @@
                 } else {
                     alert(`Your total is Rs. ${totalAmount}. Proceeding to payment...`);
                     // Here you can integrate with a payment gateway
-                    // Example: window.location.href = '/payment-page';
+                     window.location.href = 'payment.html';
                 }
             });
 
